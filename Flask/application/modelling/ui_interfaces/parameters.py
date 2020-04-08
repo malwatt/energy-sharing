@@ -18,7 +18,7 @@ from ..luomi_model import energy_sim, financial_sim, util
 from ..mike_model.new_sim import NewSim
 
 import os
-import datetime
+from datetime import datetime
 import pandas as pd
 import pendulum
 import json
@@ -81,8 +81,8 @@ class Parameters:
     #     self.ui_participants.load_defaults()
 
     #     # This is temporary.
-    #     start = datetime.datetime(year=2017, month=2, day=26, hour=10)
-    #     end = datetime.datetime(year=2017, month=2, day=26, hour=12)
+    #     start = datetime(year=2017, month=2, day=26, hour=10)
+    #     end = datetime(year=2017, month=2, day=26, hour=12)
     #     self.time_periods = util.generate_dates_in_range(start, end, 30)
 
     def load_model_selection(self, ui_inputs):
@@ -210,16 +210,16 @@ class Parameters:
         l_df = pd.read_csv(l_file_path)
 
         s_start_string = str(s_df.head(1)["timestamp"].values[0])
-        s_start = pd.datetime.strptime(s_start_string, '%d/%m/%Y %H:%M')
+        s_start = datetime.strptime(s_start_string, '%d/%m/%Y %H:%M')
 
         l_start_string = str(l_df.head(1)["timestamp"].values[0])
-        l_start = pd.datetime.strptime(l_start_string, '%d/%m/%Y %H:%M')
+        l_start = datetime.strptime(l_start_string, '%d/%m/%Y %H:%M')
 
         s_end_string = str(s_df.tail(1)["timestamp"].values[0])
-        s_end = pd.datetime.strptime(s_end_string, '%d/%m/%Y %H:%M')
+        s_end = datetime.strptime(s_end_string, '%d/%m/%Y %H:%M')
 
         l_end_string = str(l_df.tail(1)["timestamp"].values[0])
-        l_end = pd.datetime.strptime(l_end_string, '%d/%m/%Y %H:%M')
+        l_end = datetime.strptime(l_end_string, '%d/%m/%Y %H:%M')
 
         return max(s_start, l_start), min(s_end, l_end)
 

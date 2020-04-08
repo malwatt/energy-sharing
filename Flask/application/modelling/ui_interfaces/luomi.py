@@ -16,7 +16,7 @@ from ..luomi_model import energy_sim, financial_sim, util
 
 
 import os
-import datetime
+from datetime import datetime
 import pandas as pd
 import pendulum
 import json
@@ -153,16 +153,16 @@ class LuomiWrapper:
         l_df = pd.read_csv(l_file_path)
 
         s_start_string = str(s_df.head(1)["timestamp"].values[0])
-        s_start = pd.datetime.strptime(s_start_string, '%d/%m/%Y %H:%M')
+        s_start = datetime.strptime(s_start_string, '%d/%m/%Y %H:%M')
 
         l_start_string = str(l_df.head(1)["timestamp"].values[0])
-        l_start = pd.datetime.strptime(l_start_string, '%d/%m/%Y %H:%M')
+        l_start = datetime.strptime(l_start_string, '%d/%m/%Y %H:%M')
 
         s_end_string = str(s_df.tail(1)["timestamp"].values[0])
-        s_end = pd.datetime.strptime(s_end_string, '%d/%m/%Y %H:%M')
+        s_end = datetime.strptime(s_end_string, '%d/%m/%Y %H:%M')
 
         l_end_string = str(l_df.tail(1)["timestamp"].values[0])
-        l_end = pd.datetime.strptime(l_end_string, '%d/%m/%Y %H:%M')
+        l_end = datetime.strptime(l_end_string, '%d/%m/%Y %H:%M')
 
         return max(s_start, l_start), min(s_end, l_end)
 

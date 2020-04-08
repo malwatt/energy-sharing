@@ -4,7 +4,7 @@ block_cipher = None
 
 
 a = Analysis(['test.py'],
-             pathex=['/Users/lukemarshall/Projects/energy-sharing/Flask'],
+             pathex=[],
              binaries=[],
              datas=[],
              hiddenimports=[],

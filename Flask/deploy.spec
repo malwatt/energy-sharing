@@ -5,7 +5,7 @@ block_cipher = None
 include_folders = [('application','application')]
 
 a = Analysis(['run-dev.py'],
-             pathex=['/Users/lukemarshall/Projects/energy-sharing/Flask'],
+             pathex=[],
              binaries=[],
              datas=include_folders,
              hiddenimports=['engineio.async_drivers.threading','engineio','engineio.async_gevent', 'engineio.async_eventlet'],

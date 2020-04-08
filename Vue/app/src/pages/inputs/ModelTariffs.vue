@@ -159,10 +159,10 @@
                 
                 <div class="container-content">
                     <div class="tariffs">
-                        <div class="tariff-label">Paid to Local Solar</div>
-                        <!-- <div class="input">
+                        <div class="tariff-label">Paid for Local Solar</div>
+                        <div class="input">
                             Energy <input v-model="input_data.tariffs.central_battery.local_solar_import_energy"/> <span class="units">($/kWh)</span>
-                        </div> -->
+                        </div>
                         <div class="input">
                             Retail <input v-model="input_data.tariffs.central_battery.local_solar_import_retail"/> <span class="units">($/kWh)</span>
                         </div>

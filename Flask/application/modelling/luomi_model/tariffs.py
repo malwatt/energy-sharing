@@ -30,50 +30,36 @@ class Tariffs():
         block_1_volume = float(self.config['retail']['block_1_volume'])
         block_2_volume = float(self.config['retail']['block_2_volume'])
         
-        tou_weekday_only_flag = False
+        demand_charge = 0
+        tou_weekday_only_flag = 0
 
         if retail_tariff_type == 'Block':
             variable_tariff = (block_1_charge, block_2_charge, block_1_volume)
         elif retail_tariff_type == 'TOU':
-            variable_tariff = (peak_charge, shoulder_charge, offpeak_charge, peak_start_time, peak_end_time, peak_start_time_2, peak_end_time_2, shoulder_start_time, shoulder_end_time, shoulder_start_time_2, shoulder_end_time_2, tou_weekday_only_flag)
+            variable_tariff = (peak_charge, shoulder_charge, offpeak_charge, peak_start_time, peak_end_time, peak_start_time_2, peak_end_time_2, shoulder_start_time, shoulder_end_time, shoulder_start_time_2, shoulder_end_time_2, tou_weekday_only_flag, demand_charge)
         else:
             raise ValueError('Retail tariff type not known:'+str(retail_tariff_type))
 
         return variable_tariff
 
     def get_local_solar_import_tariff(self, date_time):
-        """
-            The amount which the Participant pays for local solar they consume.
-        """
+        """This is the amount which the participant pays for local solar they consume."""
         local_solar_import_tariff = float(self.config['local_solar']['energy']) + float(self.config['local_solar']['retail']) + float(self.config['local_solar']['duos']) + float(self.config['local_solar']['tuos'])
         return local_solar_import_tariff
     
-
     def get_local_solar_export_tariff(self, date_time):
-        """Input in UI. 
-        Is the amount which the Participant is paid for local solar they generate."""
-        local_solar_export_tariff = float(self.config['local_solar']['energy'])
-        return local_solar_export_tariff
+        """Input in UI. This is the amount which the participant is paid for local solar they generate."""
+        return float(self.config['local_solar']['energy'])
 
-
-    def get_central_batt_tariff(self,date_time):
-        """This is the tariff paid by the battery to the solar owner when importing solar. It should ONLY include energy and is what the participant RECEIVES."""
-        """Input in UI"""
+    def get_energy_income_on_central_batt_solar_import(self,date_time):
+        """Input in UI. This is the tariff paid by the battery to the solar owner when importing solar. It should ONLY include energy and is what the participant RECEIVES."""
         return float(self.config['central_battery']['local_solar_import_energy'])
 
     def get_central_batt_buy_tariff(self,date_time):
         """This is the tariff paid by the participant to the battery when consuming battery export electricity."""
-        """Input in UI"""
-        participant_central_battery_import_tariff = float(self.config['central_battery']['energy']) + float(self.config['central_battery']['retail']) + float(self.config['central_battery']['duos']) + float(self.config['central_battery']['tuos']) + float(self.config['central_battery']['nuos']) + float(self.config['central_battery']['profit'])
-        # print(self.config['central_battery'])
-        # print("energy", self.config['central_battery']['energy'])
-        # print("retail", self.config['central_battery']['retail'])
-        # print("duos", self.config['central_battery']['duos'])
-        # print("tuos", self.config['central_battery']['tuos'])
-        # print("nuos", self.config['central_battery']['nuos'])
-        # print("profit", self.config['central_battery']['profit'])
-        
-        # print(participant_central_battery_import_tariff)
+        # No need for an energy field. In effect, the Profit field is the equivalent to an energy field because it is what is paid to the generator/battery.
+        #participant_central_battery_import_tariff = float(self.config['central_battery']['energy']) + float(self.config['central_battery']['retail']) + float(self.config['central_battery']['duos']) + float(self.config['central_battery']['tuos']) + float(self.config['central_battery']['profit'])
+        participant_central_battery_import_tariff = float(self.config['central_battery']['retail']) + float(self.config['central_battery']['duos']) + float(self.config['central_battery']['tuos']) + float(self.config['central_battery']['profit'])
         return participant_central_battery_import_tariff
 
     def get_retail_solar_tariff(self,date_time, retail_tariff_type, solar_capacity):
@@ -211,7 +197,8 @@ class Tariffs():
 
 
     def get_nuos_on_local_solar_import(self,date_time, nuos_tariff_type):
-        return float(self.config['local_solar']['tuos'])
+        #return float(self.config['local_solar']['nuos'])  # No 'nuos' coming from Local Solar Component of UI so returning duos+tuos.
+        return float(self.config['local_solar']['duos']) + float(self.config['local_solar']['tuos'])
 
     def get_nuos_on_central_batt_import(self,date_time, nuos_tariff_type):
         """This is the NUOS paid by the customer when consuming battery export."""
@@ -237,7 +224,7 @@ class Tariffs():
     # Total battery import tariff (i.e. what the battery has to pay when importing energy) Includes energy payment + NUOS payment + retail payment
     def get_total_central_battery_import_tariff(self, date_time):
         """What the battery pays when importing energy"""
-        total_battery_import_tariff = self.get_central_batt_tariff(date_time) + self.get_duos_on_central_batt_solar_import(date_time) + self.get_tuos_on_central_batt_solar_import(date_time) + self.get_retail_income_on_central_batt_solar_import(date_time)
+        total_battery_import_tariff = self.get_energy_income_on_central_batt_solar_import(date_time) + self.get_duos_on_central_batt_solar_import(date_time) + self.get_tuos_on_central_batt_solar_import(date_time) + self.get_retail_income_on_central_batt_solar_import(date_time)
         return total_battery_import_tariff
 
 # test_tariff = Tariffs('test_scheme',"data/retail_tariffs.csv","data/duos.csv","test", "data/ui_tariffs_eg.csv")

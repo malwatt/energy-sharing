@@ -3,6 +3,9 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 name = "pypi"
 
+[requires]
+python_version = "3.7"
+
 [packages]
 flask = "*"
 flask-socketio = "*"
@@ -16,12 +19,9 @@ Cython = "*"
 gunicorn = "*"
 matplotlib = "*"
 lazy = "*"
-pyinstaller = "*"
+pyinstaller = "==3.5"
 tornado = "*"
 pathlib = "*"
 pip = "*"
 
 [dev-packages]
-
-[requires]
-python_version = "3.7"

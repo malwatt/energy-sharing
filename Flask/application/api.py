@@ -285,7 +285,3 @@ def status_callback(message):
                 }
             }
         )
-       
-
-if __name__ == 'main':
-    socketio.run(app, debug=True)
