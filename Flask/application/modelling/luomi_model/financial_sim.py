@@ -8,6 +8,8 @@ TIME_PERIOD_LENGTH_MINS = 30
 
 def simulate(time_periods, mynetwork, my_tariffs, results, status_callback=None):
     
+    battery_owner = my_tariffs.get_central_battery_owner()
+
     # --------------------------------------------------------------
     # DNSP financial calcs
     # --------------------------------------------------------------  
@@ -39,10 +41,14 @@ def simulate(time_periods, mynetwork, my_tariffs, results, status_callback=None)
 
             # Financial calcs for DNSP
             # Fixed charges revenue is the fixed charge times by the number of customers paying this charge
-            results.set_dnsp_grid_import_revenue_fixed(time,  my_tariffs.get_duos_on_grid_import_fixed(TIME_PERIOD_LENGTH_MINS, network_tariff_type) * len(mynetwork.get_participants()))
-            results.set_dnsp_local_solar_import_revenue(time,  my_tariffs.get_duos_on_local_solar_import(time) * gross_participant_local_solar_import)
-            results.set_dnsp_central_battery_import_revenue(time,  my_tariffs.get_duos_on_central_batt_import(time) * gross_participant_central_battery_import)
+            results.set_dnsp_grid_import_revenue_fixed(time, my_tariffs.get_duos_on_grid_import_fixed(TIME_PERIOD_LENGTH_MINS, network_tariff_type) * len(mynetwork.get_participants()))
+            results.set_dnsp_local_solar_import_revenue(time, my_tariffs.get_duos_on_local_solar_import_from_peer(time) * gross_participant_local_solar_import)
             
+            duos_on_central_batt = my_tariffs.get_duos_on_central_batt_export(time)
+            if battery_owner == 'Third Party':
+                duos_on_central_batt += my_tariffs.get_duos_on_central_batt_solar_import(time)
+            results.set_dnsp_central_battery_import_revenue(time, duos_on_central_batt * gross_participant_central_battery_import)
+
             # Variable component - will need to be the sum of each individual participant's dnsp payment because each may be on a different tariff.
 
             # Left over load which requires grid import. Calculated in energy flows above.
@@ -135,9 +141,13 @@ def simulate(time_periods, mynetwork, my_tariffs, results, status_callback=None)
             # Financial calcs for TNSP
             # Fixed charges revenue is the fixed charge times by the number of customers paying this charge
             results.set_tnsp_grid_import_revenue_fixed(time, my_tariffs.get_tuos_on_grid_import_fixed(TIME_PERIOD_LENGTH_MINS, network_tariff_type) * len(mynetwork.get_participants()))
-            results.set_tnsp_local_solar_import_revenue(time, my_tariffs.get_tuos_on_local_solar_import(time) * gross_participant_local_solar_import)
-            results.set_tnsp_central_battery_import_revenue(time, my_tariffs.get_tuos_on_central_batt_import(time) * gross_participant_central_battery_import)
-            
+            results.set_tnsp_local_solar_import_revenue(time, my_tariffs.get_tuos_on_local_solar_import_from_peer(time) * gross_participant_local_solar_import)
+
+            tuos_on_central_batt = my_tariffs.get_tuos_on_central_batt_export(time)
+            if battery_owner == 'Third Party':
+                tuos_on_central_batt += my_tariffs.get_tuos_on_central_batt_solar_import(time)
+            results.set_tnsp_central_battery_import_revenue(time, tuos_on_central_batt * gross_participant_central_battery_import)
+
             # Variable component - will need to be the sum of each individual participant's tnsp payment because each may be on a different tariff.
 
             # Left over load which requires grid import. Calculated in energy flows above.
@@ -230,8 +240,12 @@ def simulate(time_periods, mynetwork, my_tariffs, results, status_callback=None)
             # Financial calcs for NUOS
             # Fixed charges revenue is the fixed charge times by the number of customers paying this charge
             results.set_nuos_grid_import_revenue_fixed(time, my_tariffs.get_nuos_on_grid_import_fixed(TIME_PERIOD_LENGTH_MINS, network_tariff_type) * len(mynetwork.get_participants()))
-            results.set_nuos_local_solar_import_revenue(time, my_tariffs.get_nuos_on_local_solar_import(time, network_tariff_type) * gross_participant_local_solar_import)
-            results.set_nuos_central_battery_import_revenue(time, my_tariffs.get_nuos_on_central_batt_import(time, network_tariff_type) * gross_participant_central_battery_import)
+            results.set_nuos_local_solar_import_revenue(time, my_tariffs.get_nuos_on_local_solar_import_from_peer(time) * gross_participant_local_solar_import)
+
+            nuos_on_central_batt = my_tariffs.get_nuos_on_central_batt_export(time)
+            if battery_owner == 'Third Party':
+                nuos_on_central_batt += my_tariffs.get_nuos_on_central_batt_solar_import(time)
+            results.set_nuos_central_battery_import_revenue(time, nuos_on_central_batt * gross_participant_central_battery_import)
 
             # Variable component - will need to be the sum of each individual participant's NUOS payment because each may be on a different tariff.
 
@@ -325,12 +339,12 @@ def simulate(time_periods, mynetwork, my_tariffs, results, status_callback=None)
             external_grid_import = results.get_external_grid_elec_import(time, p.get_id())
 
             # Calc resultant financial flows (all except variable charge - this is done below)
-            results.set_local_solar_import_charge(time, p.get_id(), my_tariffs.get_local_solar_import_tariff(time) * local_solar_import)
-            results.set_central_batt_import_charge(time, p.get_id(), my_tariffs.get_energy_income_on_central_batt_solar_import(time) * participant_central_batt_import)
-            results.set_local_solar_sales_revenue(time, p.get_id(), my_tariffs.get_local_solar_export_tariff(time) * local_solar_sales)
-            results.set_central_batt_solar_sales_revenue(time, p.get_id(), my_tariffs.get_central_batt_buy_tariff(time) * central_batt_solar_sales)
-            results.set_export_to_grid_solar_sales_revenue(time, p.get_id(), my_tariffs.get_retail_solar_tariff(time,retail_tariff_type,8) * export_to_grid_solar_sales)
-            results.set_fixed_charge(time, p.get_id(), (my_tariffs.get_fixed_tariff(TIME_PERIOD_LENGTH_MINS, retail_tariff_type) +
+            results.set_local_solar_import_charge(time, p.get_id(), my_tariffs.get_total_local_solar_import_from_peer_tariff(time) * local_solar_import)
+            results.set_central_batt_import_charge(time, p.get_id(), my_tariffs.get_total_central_batt_export_tariff(time) * participant_central_batt_import)
+            results.set_local_solar_sales_revenue(time, p.get_id(), my_tariffs.get_energy_income_on_local_solar_import_from_peer(time) * local_solar_sales)
+            results.set_central_batt_solar_sales_revenue(time, p.get_id(), my_tariffs.get_energy_income_on_central_batt_solar_import(time) * central_batt_solar_sales)
+            results.set_export_to_grid_solar_sales_revenue(time, p.get_id(), my_tariffs.get_retail_solar_feed_in_tariff(time,retail_tariff_type,8) * export_to_grid_solar_sales)
+            results.set_fixed_charge(time, p.get_id(), (my_tariffs.get_retail_fixed_tariff(TIME_PERIOD_LENGTH_MINS, retail_tariff_type) +
                                                         my_tariffs.get_duos_on_grid_import_fixed(TIME_PERIOD_LENGTH_MINS, network_tariff_type) +
                                                         my_tariffs.get_tuos_on_grid_import_fixed(TIME_PERIOD_LENGTH_MINS, network_tariff_type)
             ))
@@ -342,7 +356,7 @@ def simulate(time_periods, mynetwork, my_tariffs, results, status_callback=None)
             # The block tariffs will be applied by counting the volume of energy used within the period and applying the appropriate tariff accordingly
             # if retail_tariff_type == 'Business Anytime':
             if 'Block' in retail_tariff_type:
-                block_1_charge, block_2_charge, block_1_volume = my_tariffs.get_variable_retail_tariff(time,'Block')
+                block_1_charge, block_2_charge, block_1_volume = my_tariffs.get_retail_variable_tariff(time,'Block')
 
                 # First, calculate the current cumulative energy usage
                 # Check whether it's a new day. If the current hour is midnight and the previous hour was 11pm, then it's a new day.
@@ -365,12 +379,11 @@ def simulate(time_periods, mynetwork, my_tariffs, results, status_callback=None)
                 # Apply the tariff 
                 results.set_participant_variable_charge(time, p.get_id(), variable_tariff * external_grid_import)
 
-
             # TOU Tariffs ---------------
             # The TOU tariffs will be applied by using if statements to determine whether peak/shoulder/off-peak
             # if retail_tariff_type == 'Business TOU':
             if 'TOU' in retail_tariff_type:
-                variable_tariff = get_tou_variable_tariff(time, my_tariffs.get_variable_retail_tariff(time,'TOU'))
+                variable_tariff = get_tou_variable_tariff(time, my_tariffs.get_retail_variable_tariff(time,'TOU'))
                 results.set_participant_variable_charge(time, p.get_id(), ((variable_tariff * external_grid_import) +
                                                                            results.get_participant_duos_payments(time, p.get_id()) +
                                                                            results.get_participant_tuos_payments(time, p.get_id())
@@ -402,14 +415,19 @@ def simulate(time_periods, mynetwork, my_tariffs, results, status_callback=None)
        
         
         total_variable = sum([results.get_participant_variable_charge(time, p.get_id()) for p in mynetwork.get_participants()])
-        total_fixed = sum([my_tariffs.get_fixed_tariff(TIME_PERIOD_LENGTH_MINS, p.get_retail_tariff_type()) for p in mynetwork.get_participants()])
-        total_local_solar = sum([results.get_local_solar_import(time, p.get_id()) * my_tariffs.get_retail_income_on_local_solar_import(time) for p in mynetwork.get_participants()])
+        total_fixed = sum([my_tariffs.get_retail_fixed_tariff(TIME_PERIOD_LENGTH_MINS, p.get_retail_tariff_type()) for p in mynetwork.get_participants()])
+        total_local_solar = sum([results.get_local_solar_import(time, p.get_id()) * my_tariffs.get_retail_income_on_local_solar_import_from_peer(time) for p in mynetwork.get_participants()])
         total_fit_payments = sum([results.get_export_to_grid_solar_sales_revenue(time, p.get_id()) for p in mynetwork.get_participants()])
 
         results.set_retailer_grid_import_revenue_fixed(time, total_fixed)
         results.set_retailer_grid_import_revenue_variable(time, total_variable)
         results.set_retailer_local_solar_import_revenue(time, total_local_solar)
-        results.set_retailer_central_battery_import_revenue(time, my_tariffs.get_retail_income_on_central_batt_import(time) * results.get_gross_participant_central_battery_import(time))
+        
+        retail_income_on_central_batt = my_tariffs.get_retail_income_on_central_batt_export(time)
+        if battery_owner == 'Third Party':
+            retail_income_on_central_batt += my_tariffs.get_retail_income_on_central_batt_solar_import(time)
+        results.set_retailer_central_battery_import_revenue(time, retail_income_on_central_batt * results.get_gross_participant_central_battery_import(time))
+
         total_retailer_revenue = results.get_retailer_grid_import_revenue_fixed(time) + results.get_retailer_grid_import_revenue_variable(time) + results.get_retailer_local_solar_import_revenue(time) + results.get_retailer_central_battery_import_revenue(time)
         results.set_retailer_total_revenue(time, total_retailer_revenue)
         results.set_retailer_solar_fit_payments(time, total_fit_payments)
@@ -421,7 +439,7 @@ def simulate(time_periods, mynetwork, my_tariffs, results, status_callback=None)
         # TODO - will need to update thif is the battery can also import from the grid.
         battery_export = sum([results.get_participant_central_batt_import(time, p.get_id()) for p in mynetwork.get_participants()])
         # Calculate income for battery which is export(kWh) * export tariff for energy paid by consumer (c/kWh) minus import (kWh) * import tariff for energy paid by battery (c/kWh, includes energy,retail,NUOS)
-        central_battery_revenue = battery_export * my_tariffs.get_central_batt_buy_tariff(time) - battery_import * my_tariffs.get_total_central_battery_import_tariff(time)
+        central_battery_revenue = battery_export * my_tariffs.get_energy_income_on_central_batt_export(time) - battery_import * my_tariffs.get_total_central_batt_solar_import_tariff(time)
         results.set_central_battery_revenue(time, central_battery_revenue)
 
 

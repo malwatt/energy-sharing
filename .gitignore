@@ -4,7 +4,7 @@ Electron/app/model
 dist/
 build/
 
-.DS_STORE
+.DS_Store
 
 .idea/
 .vscode*

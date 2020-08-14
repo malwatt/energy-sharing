@@ -34,12 +34,12 @@
                     <div class="tariffs">
                         <div class="input">
                             Daily Charge <input v-model="input_data.tariffs.retail.daily_charge"/> <span class="units">($)</span>
-                        </div>
-                       
-                    </div>
-                    <div class="tariffs">
+                        </div>     
                         <div class="input">
-                            Solar Feed-In Tariff <input v-model="input_data.tariffs.feed_in_tariff.energy"/> <span class="units">($/kWh)</span>
+                            Spot Tariff <input v-model="input_data.tariffs.retail.spot_tariff"/> <span class="units">($/kWh)</span>
+                        </div>
+                        <div class="input">
+                            Solar Feed-In Tariff <input v-model="input_data.tariffs.retail.feed_in_tariff"/> <span class="units">($/kWh)</span>
                         </div>
                     </div>
                 
@@ -130,16 +130,26 @@
                     </div>
                 </div>
             </div>
+
             <div class="container">
                 <div class="container-header">
                     Central Battery Component
                 </div>
 
                 <div class="tariffs">
-                    
-                    <!-- <div class="input">
+                    <div class="tariff-label">Owner</div>
+                    <div class="input">            
+                        <input type="radio" id="one" value="DNSP" v-model="input_data.tariffs.central_battery.owner"><label for="one" class="units">DNSP</label>
+                    </div>
+                    <div class="input">
+                        <input type="radio" id="two" value="Third Party" v-model="input_data.tariffs.central_battery.owner"><label for="two" class="units">Third Party</label>
+                    </div>
+                </div>
+
+                <div class="tariffs">
+                    <div class="input">
                         Energy <input v-model="input_data.tariffs.central_battery.energy"/> <span class="units">($/kWh)</span>
-                    </div> -->
+                    </div>
                     <div class="input">
                         Retail <input v-model="input_data.tariffs.central_battery.retail"/> <span class="units">($/kWh)</span>
                     </div>
@@ -153,7 +163,7 @@
                         NUOS <input v-model="input_data.tariffs.central_battery.nuos"/> <span class="units">($/kWh)</span>
                     </div>
                     <div class="input">
-                        Profit <input v-model="input_data.tariffs.central_battery.profit"/> <span class="units">($/kWh)</span>
+                        Battery Energy <input v-model="input_data.tariffs.central_battery.battery_energy"/> <span class="units">($/kWh)</span>
                     </div>
                 </div>
                 
@@ -176,13 +186,8 @@
                             NUOS <input v-model="input_data.tariffs.central_battery.local_solar_import_nuos"/> <span class="units">($/kWh)</span>
                         </div>
                     </div>
-
-                    
-
                 </div>
             </div>
-
-
         </div>
     </div>
 </template>
@@ -225,71 +230,72 @@
 
                 input_data: {
 
-
                     tariffs:{
-                        local_solar:{
-                            energy:0, 
-                            retail:0, 
-                            duos:0, 
-                            tuos:0, 
-                        },
-                        central_battery:{
-                            local_solar_import_energy:0,
-                            local_solar_import_retail:0,
-                            local_solar_import_duos:0,
-                            local_solar_import_tuos:0,
-                            local_solar_import_nuos:0,
-                            energy:0, 
-                            retail:0, 
-                            duos:0, 
-                            nuos:0, 
-                            tuos:0,
-                            profit:0, 
-
-                        },
-                        feed_in_tariff:{
-                            energy:0, //Not UI Implemented
-                        },
                         retail:{
-                            peak_tariff: 0.3,
-                            shoulder_tariff: 0.2,
-                            off_peak_tariff:0.1,
-                            block_1_tariff:0, //Not UI Implemented
-                            block_2_tariff:0, //NOT UI Implemented
-                            block_1_volume:0, //Not UI Implemented
-                            block_2_volume:0, //Not UI Implemented
-                            daily_charge:0, //Not UI Implemented
-                            tou_weekday_only:false, //Not UI Implemented and needs backend check. Leave false for now.
+                            off_peak_tariff: 0.05,
+                            shoulder_tariff: 0.1,
+                            peak_tariff: 0.2,
+                            daily_charge: 0.5,
+                            spot_tariff: 0.05,
+                            feed_in_tariff: 0.09,
+                            block_1_tariff: 0, // Not UI Implemented
+                            block_2_tariff: 0, // NOT UI Implemented
+                            block_1_volume: 0, // Not UI Implemented
+                            block_2_volume: 0, // Not UI Implemented
+                            demand_charge: 0, // Not UI Implemented
+                            tou_weekday_only: 0, // Not UI Implemented
                         },
 
                         tuos:{
-                            peak_tariff: 0.2,
-                            shoulder_tariff: 0.1,
-                            off_peak_tariff:0.1,
-                            daily_charge:0, 
+                            off_peak_tariff: 0.4,
+                            shoulder_tariff: 0.4,
+                            peak_tariff: 0.4,
+                            daily_charge: 0,
                             demand_charge: 0, // Not UI Implemented
-                            tou_weekday_only:false, //Not UI Implemented and needs backend check. Leave false for now.
+                            tou_weekday_only: 0, // Not UI Implemented
                         },
 
                         duos:{
-                            peak_tariff: 0.4,
-                            shoulder_tariff: 0.3,
-                            off_peak_tariff:0.1,
-                            daily_charge:0, 
-                            demand_charge:0, // Not UI Implemented
-                            tou_weekday_only:false, // Not UI Implemented and needs backend check. Leave false for now.
+                            off_peak_tariff: 0.05,
+                            shoulder_tariff: 0.1,
+                            peak_tariff: 0.15,
+                            daily_charge: 1,
+                            demand_charge: 0, // Not UI Implemented
+                            tou_weekday_only: 0, // Not UI Implemented
                         },
 
                         nuos:{
-                            peak_tariff: 0.5,
-                            shoulder_tariff: 0.1,
-                            off_peak_tariff:0.1,
-                            demand_charge:0,
-                            daily_charge:0, //Not UI Implemented
-                            tou_weekday_only:false, // Not UI Implemented and needs backend check. Leave false for now.
+                            off_peak_tariff: 0.09,
+                            shoulder_tariff: 0.14,
+                            peak_tariff: 0.19,
+                            daily_charge: 1,
+                            demand_charge: 0, //Not UI Implemented
+                            tou_weekday_only: 0, // Not UI Implemented
                         },
 
-                        tou_times: [7, 11, 15,18],
+                        tou_times: [7, 11, 15, 18],
+
+                        local_solar:{
+                            energy: 0, 
+                            retail: 0, 
+                            duos: 0, 
+                            tuos: 0, 
+                        },
+
+                        central_battery:{
+                            owner: "DNSP",
+                            local_solar_import_energy: 0,
+                            local_solar_import_retail: 0,
+                            local_solar_import_duos: 0,
+                            local_solar_import_tuos: 0,
+                            local_solar_import_nuos: 0,
+                            energy: 0, 
+                            retail: 0, 
+                            duos: 0, 
+                            tuos: 0, 
+                            nuos: 0,
+                            battery_energy: 0,
+                        }
                     },
 
                     selected_config_file: false,
@@ -332,7 +338,7 @@
         computed:{
 
             total_solar_tariff(){
-                var total = Number(this.input_data.tariffs.local_solar.retail) + Number(this.input_data.tariffs.local_solar.tuos) + Number(this.input_data.tariffs.local_solar.duos);
+                var total = Number(this.input_data.tariffs.local_solar.energy) + Number(this.input_data.tariffs.local_solar.retail) + Number(this.input_data.tariffs.local_solar.tuos) + Number(this.input_data.tariffs.local_solar.duos);
                 return Number(total).toFixed(2);
             },
 
@@ -658,8 +664,7 @@
         align-items:center;
         margin: 1.5vh 0 1.5vh 0;
         font-size:0.8em;
-        width:100%;
-        
+        width:100%;      
     }
 
     .tariffs .input{
@@ -668,7 +673,6 @@
         flex-direction:row;
         justify-content:center;
         align-items:center;
-
     }
 
     .tariffs input{
