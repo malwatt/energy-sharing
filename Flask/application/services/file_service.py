@@ -101,6 +101,8 @@ class OSFileService(FileService):
         return True, "Success"
 
     def save(self, file, save_type):
+        file.stream.seek(0)
+
         if save_type == "solar_data":
             file.save(os.path.join(self.solar_data_save_path, file.filename))
 
